@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 import pygame
 
+from engine.game.game_object import GameObject
+
 class GameSystem(object):
 
     def __init__(self):
@@ -12,6 +14,7 @@ class GameSystem(object):
         self.prevtime = 0
 
     def add_system(self, system):
+        print(system.name)
         self.systems[system.name] = system
 
     def run(self):
@@ -21,6 +24,7 @@ class GameSystem(object):
         pygame.mixer.init()
         pygame.init()
         screen = pygame.display.set_mode((1280, 720))
+        game = GameObject()
         clock = pygame.time.Clock()
         for system in self.systems:
             self.systems[system].init(game)
@@ -29,12 +33,13 @@ class GameSystem(object):
         while self.running:
             delta = pygame.time.get_ticks() - self.prevtime
             self.prevtime = pygame.time.get_ticks()
+            pygame.display.get_surface().fill((0, 0, 0))
             for system in self.systems:
                 self.systems[system].update(delta, game)
             pygame.display.flip()
             clock.tick(60)
 
-        for system in self.systems[::-1]:
+        for system in self.systems:
             self.systems[system].quit(game)
 
         pygame.quit()

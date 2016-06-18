@@ -11,7 +11,7 @@ class Message(object):
 class System(object):
     """Interface for creating a new system in the Game"""
 
-    def __init__(self, system, name):
+    def __init__(self, name, system):
         """Initialize a new System"""
         super().__init__()
         self.queue = [] # Message queue
