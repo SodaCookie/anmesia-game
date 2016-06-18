@@ -12,6 +12,15 @@ class Vector(object):
         y = self.y / magnitude
         return Vector(x, y)
 
+    def rotate(self, angle):
+        x = math.cos(angle) * self.x - math.sin(angle) * self.y
+        y = math.sin(angle) * self.x + math.cos(angle) * self.y
+        return Vector(x, y)
+
+    def angle(self, reference):
+        return math.atan2(self.y, self.x) - \
+            math.atan2(reference.y, reference.x)
+
     def dot(self, other):
         return (self.x * other.x) + (self.y * other.y)
 
@@ -94,3 +103,9 @@ class Vector(object):
         x = self.x * -1
         y = self.y * -1
         return Vector(x, y)
+
+    def __str__(self):
+        return "Vector(%f, %f)" % (self.x, self.y)
+
+    def __repr__(self):
+        return self.__str__()
