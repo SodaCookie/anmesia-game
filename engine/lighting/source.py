@@ -7,3 +7,6 @@ class Source(object):
 
     def move(self, x, y):
         pass
+
+    def process(self, polygons):
+        pass

@@ -18,15 +18,15 @@ class System(object):
         self.system = system
         self.name = name
 
-    def init(self, system):
+    def init(self, game):
         """Override. Called at the start of the game"""
         pass
 
-    def update(self, delta, system):
+    def update(self, delta, game):
         """Override. Called every game cycle"""
         pass
 
-    def quit(self, system):
+    def quit(self, game):
         """Override. Called at the end of the game"""
         pass
 
