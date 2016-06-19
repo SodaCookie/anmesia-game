@@ -1,4 +1,9 @@
+from collections import OrderedDict
+
 import pygame
+
+from engine.render.lighting.lighting_system import LightingSystem
+from engine.render.drawing.draw_system import DrawSystem
 
 from engine.system import Message, System
 
@@ -6,22 +11,38 @@ class RenderSystem(System):
 
     def __init__(self, system):
         super().__init__("render", system)
+        self.pipeline = OrderedDict()
+        self.add_subsystem(LightingSystem(system))
+        self.add_subsystem(DrawSystem(system))
 
-    def init(self, game):
-        pass
+    def add_subsystem(self, system):
+        """Add another system to the render pipeline"""
+        self.pipeline[system.name] = system
 
-    def update(self, delta, game):
+    def init(self, entities):
+        for system in self.pipeline.values():
+            system.init(entities)
+
+    def quit(self, entities):
+        for system in self.pipeline.values():
+            system.quit(entities)
+
+    def update(self, delta, entities):
         messages = self.flush_messages()
         for message in messages:
-            getattr(self, message.mtype)(game, *message.args)
+            message_call = message.mtype.split('.')
+            # Passing messages to subsystems
+            if len(message_call) == 2:
+                self.pipeline[message_call[0]].message(Message(
+                    message_call[1], *message.args))
+            else:
+                getattr(self, message.mtype)(game, *message.args)
 
         surface = pygame.display.get_surface()
-        width, height = surface.get_size()
+        surface.fill((0, 0, 0))
 
-        for poly in game.terrain:
-            pygame.draw.polygon(surface, (0, 255, 0), [(point.x, point.y) for point in poly.points], 1)
+        # Call systems
+        for system in self.pipeline.values():
+            system.render(delta, entities, surface)
 
-        pygame.draw.circle(surface, (0, 0, 255), (game.player.position.x, game.player.position.y), 10)
-
-    def move(self, game, vector):
-        game.player.position += vector
+        pygame.display.flip()

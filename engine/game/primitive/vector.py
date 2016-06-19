@@ -109,3 +109,6 @@ class Vector(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def __iter__(self):
+        return iter((self.x, self.y))
