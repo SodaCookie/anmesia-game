@@ -3,16 +3,19 @@ from itertools import chain
 
 from pygame import Rect
 
+from engine.game.classes.component import Component
+
 from engine.game.primitive.vector import Vector
 from engine.game.primitive.segment import Segment
 from engine.game.primitive.polygon import Polygon
 
-class LightSource(object):
+class LightSource(Component):
     """Represents the lighting object to handling lighting"""
 
     def __init__(self, position, radius, strength=1):
         """Create a new light source with a location at a vector, with a
         radius and strength value (float between 0 and 1)."""
+        super().__init__()
         self.position = position
         self.radius = radius
         self.strength = strength
@@ -38,12 +41,15 @@ class LightSource(object):
             segments.extend(polygon.segments)
 
         # Create rays to test
+        rel_position = self.position + self.entity.position
         rays = []
         for point in points:
-            direction = point - self.position
-            ray_left = Segment(self.position, direction.rotate(-0.00001))
-            ray = Segment(self.position, direction)
-            ray_right = Segment(self.position, direction.rotate(0.00001))
+            direction = point - rel_position
+            ray_left = Segment(rel_position, direction.rotate(-0.00001))
+            ray = Segment(rel_position, direction)
+            ray_right = Segment(rel_position, direction.rotate(0.00001))
+            if ray.direction.magnitude == 0:
+                continue
             rays.append(ray_left)
             rays.append(ray)
             rays.append(ray_right)
@@ -56,7 +62,7 @@ class LightSource(object):
             for segment in segments:
                 intersect = segment.intersect_ray(ray)
                 if intersect:
-                    distance = intersect - self.position
+                    distance = intersect - rel_position
                     if closest_intersection is None or \
                             distance.magnitude <= closest_magnitude:
                         closest_intersection = distance
@@ -71,8 +77,8 @@ class LightSource(object):
         # Calculate light blocks
         blocks = []
         for i in range(len(intersections)):
-            blocks.append(Polygon(self.position,
-                intersections[i] + self.position,
-                intersections[(i+1)%len(intersections)] + self.position))
+            blocks.append(Polygon(rel_position,
+                intersections[i] + rel_position,
+                intersections[(i+1)%len(intersections)] + rel_position))
 
         return blocks

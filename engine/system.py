@@ -18,15 +18,19 @@ class System(object):
         self.system = system
         self.name = name
 
-    def init(self, game):
+    def init(self, entities):
         """Override. Called at the start of the game"""
         pass
 
-    def update(self, delta, game):
-        """Override. Called every game cycle"""
-        pass
+    def update(self, delta, entities):
+        """Override. Called every game cycle by default will execute messages
+        to function calls."""
+        messages = self.flush_messages()
+        for message in messages:
+            getattr(self, "message_%s" % message.mtype)(
+                entities, *message.args)
 
-    def quit(self, game):
+    def quit(self, entities):
         """Override. Called at the end of the game"""
         pass
 
