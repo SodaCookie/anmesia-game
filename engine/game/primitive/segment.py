@@ -19,9 +19,7 @@ class Segment(object):
         intersecting this segment"""
 
         # Test if parallel
-        if other.direction.normalized() == self.direction.normalized():
-            return None
-        elif -other.direction.normalized() == self.direction.normalized():
+        if self.direction.parallel(other.direction):
             return None
 
         # Test intersection
@@ -30,8 +28,15 @@ class Segment(object):
         py1, dy1 = self.anchor.y, self.direction.y
         py2, dy2 = other.anchor.y, other.direction.y
 
-        t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / (dx2*dy1 - dy2*dx1)
-        t1 = (px2+dx2*t2-px1) / dx1
+        try:
+            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / (dx2*dy1 - dy2*dx1)
+        except ZeroDivisionError:
+            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / 0.0000001
+
+        try:
+            t1 = (px2+dx2*t2-px1) / dx1
+        except ZeroDivisionError:
+            t1 = (py2+dy2*t2-py1) / dy1
 
         if 0 <= t1 <= 1 and 0 <= t2 <= 1:
             return Vector(px1 + dx1 * t1, py1 + dy1 * t1)
@@ -41,9 +46,7 @@ class Segment(object):
         """Takes another segment object to represent as a ray and determine if this segment is intersecting the cast ray"""
 
         # Test if parallel
-        if ray.direction.normalized() == self.direction.normalized():
-            return None
-        elif -ray.direction.normalized() == self.direction.normalized():
+        if self.direction.parallel(ray.direction):
             return None
 
         # Test intersection
@@ -55,7 +58,7 @@ class Segment(object):
         try:
             t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / (dx2*dy1 - dy2*dx1)
         except ZeroDivisionError:
-            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / 0.00000001
+            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / 0.0000001
 
         try:
             t1 = (px2+dx2*t2-px1) / dx1
@@ -63,6 +66,31 @@ class Segment(object):
             t1 = (py2+dy2*t2-py1) / dy1
 
         if 0 <= t1 and 0 <= t2 <= 1:
+            return Vector(px1 + dx1 * t1, py1 + dy1 * t1)
+        return None
+
+    def intersect_line(self, line):
+        # Test if parallel
+        if self.direction.parallel(line.direction):
+            return None
+
+        # Test intersection
+        px1, dx1 = line.anchor.x, line.direction.x
+        px2, dx2 = self.anchor.x, self.direction.x
+        py1, dy1 = line.anchor.y, line.direction.y
+        py2, dy2 = self.anchor.y, self.direction.y
+
+        try:
+            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / (dx2*dy1 - dy2*dx1)
+        except ZeroDivisionError:
+            t2 = (dx1*(py2-py1) + dy1*(px1-px2)) / 0.0000001
+
+        try:
+            t1 = (px2+dx2*t2-px1) / dx1
+        except ZeroDivisionError:
+            t1 = (py2+dy2*t2-py1) / dy1
+
+        if 0 <= t2 <= 1:
             return Vector(px1 + dx1 * t1, py1 + dy1 * t1)
         return None
 

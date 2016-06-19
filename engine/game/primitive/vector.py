@@ -33,6 +33,15 @@ class Vector(object):
         self.x *= ratio
         self.y *= ratio
 
+    def parallel(self, other):
+        # Test if parallel
+        epsilon = 0.00001
+        angle = self.angle(other)
+
+        if abs(angle) < epsilon or abs(math.pi - angle) < epsilon:
+            return True
+        return False
+
     """PROPERTIES"""
 
     magnitude = property(get_magnitude, set_magnitude)

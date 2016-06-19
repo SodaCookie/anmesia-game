@@ -28,3 +28,33 @@ class Polygon(object):
         for segment in self.segments:
             segment.anchor.x += vector.x
             segment.anchor.y += vector.y
+
+    def collidepoint(self, vector):
+        """Determines if a point is within a vector"""
+        x, y = vector
+        horizontal_line = Segment(Vector(0, y), Vector.right())
+        points = []
+        for segment in self.segments:
+            intersect = segment.intersect_line(horizontal_line)
+            if intersect:
+                points.append(intersect)
+
+        left = 0
+        for intersect_x, intersect_y in points:
+            if intersect_x < x:
+                left += 1
+
+        return left % 2
+
+    def colliderangex(self, y):
+        """Given a y value, returns a list of tuples representing x ranges
+        that are found within the polygon at that y."""
+        horizontal_line = Segment(Vector(0, y), Vector.right())
+        points = []
+        for segment in self.segments:
+            intersect = segment.intersect_line(horizontal_line)
+            if intersect:
+                points.append(intersect)
+
+        i = iter(sorted(points, key=lambda point: point.x))
+        return [(first.x, second.x) for first, second in zip(i, i)]
